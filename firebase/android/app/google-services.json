@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "223014453620",
+    "project_id": "pahom-51540",
+    "storage_bucket": "pahom-51540.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:223014453620:android:58bdaf6f56f1741319ac21",
+        "android_client_info": {
+          "package_name": "com.example.firebaseflutter"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "223014453620-7c06f9fha83c0up8kuluu85712sut6gt.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCkXU5VjAaL8fgiKbUkLJw_RSUjMuBBPD8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "223014453620-7c06f9fha83c0up8kuluu85712sut6gt.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
