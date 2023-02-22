@@ -14,6 +14,9 @@ void main() async {
   runApp(const MyApp());
 }
 
+ConfirmationResult? confirmationResult;
+bool codesend = false;
+
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
@@ -72,7 +75,7 @@ class _HomePageState extends State<HomePage> {
               maxLength: 100,
               controller: _phoneController,
               decoration: const InputDecoration(
-                hintText: 'Телефон',
+                hintText: 'Телефон/Код',
                 border: OutlineInputBorder(),
               ),
             ),
@@ -120,7 +123,11 @@ class _HomePageState extends State<HomePage> {
               height: 35,
               child: ElevatedButton(
                 onPressed: () {
-                  signInPhone(_phoneController.text);
+                  if (codesend) {
+                    signInCode(_phoneController.text);
+                  } else {
+                    signInPhone(_phoneController.text);
+                  }
                 },
                 child: const Text(
                   'Авторизация (телефон)',
@@ -157,15 +164,24 @@ class _HomePageState extends State<HomePage> {
             MaterialPageRoute(builder: (context) => const ResultPage())));
   }
 
+  void signInCode(String code) async {
+    UserCredential userCredential = await confirmationResult!.confirm(code);
+    if (userCredential.user != null) {
+      // ignore: use_build_context_synchronously
+      Navigator.push(
+          context, MaterialPageRoute(builder: (context) => const ResultPage()));
+    }
+  }
+
   Future<void> signInWithEmailLink(String email) async {
     var acs = ActionCodeSettings(
       url: 'https://www.example.com/finishSignUp?cartId=1234',
       handleCodeInApp: true,
     );
     await FirebaseAuth.instance
-        .sendSignInLinkToEmail(email: email, actionCodeSettings: acs).whenComplete(() => 
-        Navigator.push(context,
-        MaterialPageRoute(builder: (context) => const ResultPage())));
+        .sendSignInLinkToEmail(email: email, actionCodeSettings: acs)
+        .whenComplete(() => Navigator.push(context,
+            MaterialPageRoute(builder: (context) => const ResultPage())));
   }
 
   void signInAnon() {
@@ -173,9 +189,10 @@ class _HomePageState extends State<HomePage> {
         context, MaterialPageRoute(builder: (context) => const ResultPage())));
   }
 
-  void signInPhone(String phone) {
-    FirebaseAuth.instance.signInWithPhoneNumber(phone).then((value) => Navigator.push(context,
-            MaterialPageRoute(builder: (context) => const ResultPage())));
+  void signInPhone(String phone) async {
+    confirmationResult =
+        await FirebaseAuth.instance.signInWithPhoneNumber(phone);
+    codesend = true;
   }
 }
 
