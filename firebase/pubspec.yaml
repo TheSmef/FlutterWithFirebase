@@ -37,6 +37,13 @@ dependencies:
   cupertino_icons: ^1.0.2
   firebase_core: ^2.6.0
   firebase_auth: ^4.2.7
+  cloud_firestore: ^4.0.2
+  freezed: ^2.3.2
+  build_runner: ^2.3.3
+  json_serializable: ^6.6.0
+  json_annotation: ^4.8.0
+  freezed_annotation: ^2.2.0
+  flutter_bloc: ^8.1.1
 
 dev_dependencies:
   flutter_test:

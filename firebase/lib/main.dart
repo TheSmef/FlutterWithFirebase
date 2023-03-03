@@ -1,8 +1,12 @@
 // ignore_for_file: no_leading_underscores_for_local_identifiers
 
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:firebaseflutter/cubit/data_cubit.dart';
+import 'package:firebaseflutter/mainpage.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 import 'firebase_options.dart';
 
@@ -22,12 +26,15 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Flutter Demo',
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
+    return BlocProvider(
+      create: (context) => DataCubit(),
+      child: MaterialApp(
+        title: 'Flutter Demo',
+        theme: ThemeData(
+          primarySwatch: Colors.blue,
+        ),
+        home: const HomePage(title: 'Flutter Demo Home Page'),
       ),
-      home: const HomePage(title: 'Flutter Demo Home Page'),
     );
   }
 }
@@ -46,7 +53,6 @@ class _HomePageState extends State<HomePage> {
   Widget build(BuildContext context) {
     final TextEditingController _emailController = TextEditingController();
     final TextEditingController _passwordController = TextEditingController();
-    final TextEditingController _phoneController = TextEditingController();
 
     return Scaffold(
       body: Center(
@@ -71,15 +77,6 @@ class _HomePageState extends State<HomePage> {
               ),
             ),
             const SizedBox(height: 25),
-            TextFormField(
-              maxLength: 100,
-              controller: _phoneController,
-              decoration: const InputDecoration(
-                hintText: 'Телефон/Код',
-                border: OutlineInputBorder(),
-              ),
-            ),
-            const SizedBox(height: 25),
             SizedBox(
               height: 35,
               child: ElevatedButton(
@@ -88,49 +85,6 @@ class _HomePageState extends State<HomePage> {
                 },
                 child: const Text(
                   'Авторизация',
-                  style: TextStyle(fontSize: 18),
-                ),
-              ),
-            ),
-            const SizedBox(height: 25),
-            SizedBox(
-              height: 35,
-              child: ElevatedButton(
-                onPressed: () {
-                  signInWithEmailLink(_emailController.text);
-                },
-                child: const Text(
-                  'Авторизация (линк)',
-                  style: TextStyle(fontSize: 18),
-                ),
-              ),
-            ),
-            const SizedBox(height: 25),
-            SizedBox(
-              height: 35,
-              child: ElevatedButton(
-                onPressed: () {
-                  signInAnon();
-                },
-                child: const Text(
-                  'Авторизация (анонимно)',
-                  style: TextStyle(fontSize: 18),
-                ),
-              ),
-            ),
-            const SizedBox(height: 25),
-            SizedBox(
-              height: 35,
-              child: ElevatedButton(
-                onPressed: () {
-                  if (codesend) {
-                    signInCode(_phoneController.text);
-                  } else {
-                    signInPhone(_phoneController.text);
-                  }
-                },
-                child: const Text(
-                  'Авторизация (телефон)',
                   style: TextStyle(fontSize: 18),
                 ),
               ),
@@ -158,41 +112,12 @@ class _HomePageState extends State<HomePage> {
   }
 
   Future<void> signInEmail(String email, String password) async {
-    FirebaseAuth.instance
-        .signInWithEmailAndPassword(email: email, password: password)
-        .then((value) => Navigator.push(context,
-            MaterialPageRoute(builder: (context) => const ResultPage())));
-  }
-
-  void signInCode(String code) async {
-    UserCredential userCredential = await confirmationResult!.confirm(code);
-    if (userCredential.user != null) {
-      // ignore: use_build_context_synchronously
-      Navigator.push(
-          context, MaterialPageRoute(builder: (context) => const ResultPage()));
-    }
-  }
-
-  Future<void> signInWithEmailLink(String email) async {
-    var acs = ActionCodeSettings(
-      url: 'https://www.example.com/finishSignUp?cartId=1234',
-      handleCodeInApp: true,
-    );
-    await FirebaseAuth.instance
-        .sendSignInLinkToEmail(email: email, actionCodeSettings: acs)
-        .whenComplete(() => Navigator.push(context,
-            MaterialPageRoute(builder: (context) => const ResultPage())));
-  }
-
-  void signInAnon() {
-    FirebaseAuth.instance.signInAnonymously().then((value) => Navigator.push(
-        context, MaterialPageRoute(builder: (context) => const ResultPage())));
-  }
-
-  void signInPhone(String phone) async {
-    confirmationResult =
-        await FirebaseAuth.instance.signInWithPhoneNumber(phone);
-    codesend = true;
+    try {
+      FirebaseAuth.instance
+          .signInWithEmailAndPassword(email: email, password: password)
+          .then((value) => Navigator.push(context,
+              MaterialPageRoute(builder: (context) => const ResultPage())));
+    } catch (e) {}
   }
 }
 
@@ -201,10 +126,94 @@ class ResultPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final GlobalKey<FormState> _key = GlobalKey();
+    final TextEditingController _loginController = TextEditingController();
+    final TextEditingController _emailController = TextEditingController();
+
     return Scaffold(
-      appBar: AppBar(),
-      body: const Center(child: Text("UWU MEGA!")),
+      body: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.all(20.0),
+          child: Form(
+            key: _key,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                const Spacer(),
+                const Text(
+                  'Изменение данных',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(fontSize: 26),
+                ),
+                const Spacer(),
+
+                TextFormField(
+                  maxLength: 25,
+                  controller: _loginController,
+                  decoration: const InputDecoration(
+                    hintText: 'Имя',
+                    border: OutlineInputBorder(),
+                  ),
+                ),
+
+                //Почта
+                TextFormField(
+                  maxLength: 100,
+                  controller: _emailController,
+                  decoration: const InputDecoration(
+                    hintText: 'Почта',
+                    border: OutlineInputBorder(),
+                  ),
+                ),
+
+                SizedBox(
+                  height: 35,
+                  child: ElevatedButton(
+                    onPressed: () {
+                      try {
+                        ChangeData(
+                            _loginController.text, _emailController.text);
+                      } catch (e) {}
+                    },
+                    child: const Text(
+                      'Изменить данные',
+                      style: TextStyle(fontSize: 18),
+                    ),
+                  ),
+                ),
+
+                const Spacer(flex: 3),
+                Align(
+                  alignment: Alignment.bottomLeft,
+                  child: ElevatedButton(
+                    onPressed: () => {
+                      Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => const MainDataPage()))
+                    },
+                    style: ElevatedButton.styleFrom(
+                      shape: const CircleBorder(),
+                      padding: const EdgeInsets.all(15),
+                    ),
+                    child: const Icon(Icons.ac_unit, color: Colors.white),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
     );
+  }
+
+  // ignore: non_constant_identifier_names
+  void ChangeData(String username, String email) {
+    FirebaseAuth.instance.currentUser?.updateEmail(email);
+    FirebaseFirestore.instance
+        .collection("users")
+        .doc(FirebaseAuth.instance.currentUser?.uid)
+        .set({"username": username, "email": email});
   }
 }
 
@@ -215,7 +224,7 @@ class RegistrationPage extends StatelessWidget {
   Widget build(BuildContext context) {
     final TextEditingController _emailController = TextEditingController();
     final TextEditingController _passwordController = TextEditingController();
-    final TextEditingController _phoneController = TextEditingController();
+    final TextEditingController _usernameController = TextEditingController();
 
     return Scaffold(
       appBar: AppBar(),
@@ -242,10 +251,10 @@ class RegistrationPage extends StatelessWidget {
             ),
             const SizedBox(height: 25),
             TextFormField(
-              maxLength: 12,
-              controller: _phoneController,
+              maxLength: 30,
+              controller: _usernameController,
               decoration: const InputDecoration(
-                hintText: 'Телефон',
+                hintText: 'Имя пользователя',
                 border: OutlineInputBorder(),
               ),
             ),
@@ -254,7 +263,8 @@ class RegistrationPage extends StatelessWidget {
               height: 35,
               child: ElevatedButton(
                 onPressed: () {
-                  signUpEmail(_emailController.text, _passwordController.text);
+                  signUpEmail(_emailController.text, _passwordController.text,
+                      _usernameController.text);
                   Navigator.push(
                       context,
                       MaterialPageRoute(
@@ -292,8 +302,15 @@ class RegistrationPage extends StatelessWidget {
     );
   }
 
-  void signUpEmail(String email, String password) async {
+  void signUpEmail(String email, String password, String username) async {
     await FirebaseAuth.instance
         .createUserWithEmailAndPassword(email: email, password: password);
+    FirebaseFirestore.instance
+        .collection("users")
+        .doc(FirebaseAuth.instance.currentUser?.uid)
+        .set({
+      "username": username,
+      "email": email,
+    });
   }
 }
