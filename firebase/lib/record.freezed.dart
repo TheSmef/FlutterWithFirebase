@@ -20,9 +20,12 @@ Record _$RecordFromJson(Map<String, dynamic> json) {
 
 /// @nodoc
 mixin _$Record {
-  String get uid => throw _privateConstructorUsedError;
-  String get content => throw _privateConstructorUsedError;
-  String get date => throw _privateConstructorUsedError;
+  @JsonKey(ignore: true)
+  String? get uid => throw _privateConstructorUsedError;
+  String get userid => throw _privateConstructorUsedError;
+  String get name => throw _privateConstructorUsedError;
+  String get uri => throw _privateConstructorUsedError;
+  int get size => throw _privateConstructorUsedError;
 
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
   @JsonKey(ignore: true)
@@ -34,7 +37,12 @@ abstract class $RecordCopyWith<$Res> {
   factory $RecordCopyWith(Record value, $Res Function(Record) then) =
       _$RecordCopyWithImpl<$Res, Record>;
   @useResult
-  $Res call({String uid, String content, String date});
+  $Res call(
+      {@JsonKey(ignore: true) String? uid,
+      String userid,
+      String name,
+      String uri,
+      int size});
 }
 
 /// @nodoc
@@ -50,23 +58,33 @@ class _$RecordCopyWithImpl<$Res, $Val extends Record>
   @pragma('vm:prefer-inline')
   @override
   $Res call({
-    Object? uid = null,
-    Object? content = null,
-    Object? date = null,
+    Object? uid = freezed,
+    Object? userid = null,
+    Object? name = null,
+    Object? uri = null,
+    Object? size = null,
   }) {
     return _then(_value.copyWith(
-      uid: null == uid
+      uid: freezed == uid
           ? _value.uid
           : uid // ignore: cast_nullable_to_non_nullable
+              as String?,
+      userid: null == userid
+          ? _value.userid
+          : userid // ignore: cast_nullable_to_non_nullable
               as String,
-      content: null == content
-          ? _value.content
-          : content // ignore: cast_nullable_to_non_nullable
+      name: null == name
+          ? _value.name
+          : name // ignore: cast_nullable_to_non_nullable
               as String,
-      date: null == date
-          ? _value.date
-          : date // ignore: cast_nullable_to_non_nullable
+      uri: null == uri
+          ? _value.uri
+          : uri // ignore: cast_nullable_to_non_nullable
               as String,
+      size: null == size
+          ? _value.size
+          : size // ignore: cast_nullable_to_non_nullable
+              as int,
     ) as $Val);
   }
 }
@@ -77,7 +95,12 @@ abstract class _$$_RecordCopyWith<$Res> implements $RecordCopyWith<$Res> {
       __$$_RecordCopyWithImpl<$Res>;
   @override
   @useResult
-  $Res call({String uid, String content, String date});
+  $Res call(
+      {@JsonKey(ignore: true) String? uid,
+      String userid,
+      String name,
+      String uri,
+      int size});
 }
 
 /// @nodoc
@@ -90,23 +113,33 @@ class __$$_RecordCopyWithImpl<$Res>
   @pragma('vm:prefer-inline')
   @override
   $Res call({
-    Object? uid = null,
-    Object? content = null,
-    Object? date = null,
+    Object? uid = freezed,
+    Object? userid = null,
+    Object? name = null,
+    Object? uri = null,
+    Object? size = null,
   }) {
     return _then(_$_Record(
-      uid: null == uid
+      uid: freezed == uid
           ? _value.uid
           : uid // ignore: cast_nullable_to_non_nullable
+              as String?,
+      userid: null == userid
+          ? _value.userid
+          : userid // ignore: cast_nullable_to_non_nullable
               as String,
-      content: null == content
-          ? _value.content
-          : content // ignore: cast_nullable_to_non_nullable
+      name: null == name
+          ? _value.name
+          : name // ignore: cast_nullable_to_non_nullable
               as String,
-      date: null == date
-          ? _value.date
-          : date // ignore: cast_nullable_to_non_nullable
+      uri: null == uri
+          ? _value.uri
+          : uri // ignore: cast_nullable_to_non_nullable
               as String,
+      size: null == size
+          ? _value.size
+          : size // ignore: cast_nullable_to_non_nullable
+              as int,
     ));
   }
 }
@@ -115,21 +148,30 @@ class __$$_RecordCopyWithImpl<$Res>
 @JsonSerializable()
 class _$_Record implements _Record {
   const _$_Record(
-      {required this.uid, required this.content, required this.date});
+      {@JsonKey(ignore: true) this.uid,
+      required this.userid,
+      required this.name,
+      required this.uri,
+      required this.size});
 
   factory _$_Record.fromJson(Map<String, dynamic> json) =>
       _$$_RecordFromJson(json);
 
   @override
-  final String uid;
+  @JsonKey(ignore: true)
+  final String? uid;
   @override
-  final String content;
+  final String userid;
   @override
-  final String date;
+  final String name;
+  @override
+  final String uri;
+  @override
+  final int size;
 
   @override
   String toString() {
-    return 'Record(uid: $uid, content: $content, date: $date)';
+    return 'Record(uid: $uid, userid: $userid, name: $name, uri: $uri, size: $size)';
   }
 
   @override
@@ -138,13 +180,15 @@ class _$_Record implements _Record {
         (other.runtimeType == runtimeType &&
             other is _$_Record &&
             (identical(other.uid, uid) || other.uid == uid) &&
-            (identical(other.content, content) || other.content == content) &&
-            (identical(other.date, date) || other.date == date));
+            (identical(other.userid, userid) || other.userid == userid) &&
+            (identical(other.name, name) || other.name == name) &&
+            (identical(other.uri, uri) || other.uri == uri) &&
+            (identical(other.size, size) || other.size == size));
   }
 
   @JsonKey(ignore: true)
   @override
-  int get hashCode => Object.hash(runtimeType, uid, content, date);
+  int get hashCode => Object.hash(runtimeType, uid, userid, name, uri, size);
 
   @JsonKey(ignore: true)
   @override
@@ -162,18 +206,25 @@ class _$_Record implements _Record {
 
 abstract class _Record implements Record {
   const factory _Record(
-      {required final String uid,
-      required final String content,
-      required final String date}) = _$_Record;
+      {@JsonKey(ignore: true) final String? uid,
+      required final String userid,
+      required final String name,
+      required final String uri,
+      required final int size}) = _$_Record;
 
   factory _Record.fromJson(Map<String, dynamic> json) = _$_Record.fromJson;
 
   @override
-  String get uid;
+  @JsonKey(ignore: true)
+  String? get uid;
   @override
-  String get content;
+  String get userid;
   @override
-  String get date;
+  String get name;
+  @override
+  String get uri;
+  @override
+  int get size;
   @override
   @JsonKey(ignore: true)
   _$$_RecordCopyWith<_$_Record> get copyWith =>

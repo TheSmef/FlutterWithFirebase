@@ -1,11 +1,15 @@
+import 'dart:math';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebaseflutter/add.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:firebaseflutter/cubit/data_cubit.dart';
-import 'package:firebaseflutter/edit.dart';
 import 'package:firebaseflutter/main.dart';
 import 'package:firebaseflutter/record.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:image_downloader/image_downloader.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 class MainDataPage extends StatefulWidget {
@@ -37,8 +41,7 @@ class _MainDataPage extends State<MainDataPage> {
           height: 35,
           child: ElevatedButton(
             onPressed: () {
-              Navigator.push(
-                  context, MaterialPageRoute(builder: (context) => AddPage()));
+              insertImage();
             },
             child: const Text(
               'Добавить данные',
@@ -60,38 +63,31 @@ class _MainDataPage extends State<MainDataPage> {
                           for (int i = 0; i < snapshot.data!.length; i++)
                             Column(
                               children: [
-                                Text("id: ${snapshot.data?.elementAt(i).uid}",
-                                    style: const TextStyle(fontSize: 18)),
                                 Text(
-                                    "Имя: ${snapshot.data?.elementAt(i).content}",
+                                    "id: ${snapshot.data?.elementAt(i).userid}",
                                     style: const TextStyle(fontSize: 18)),
-                                Text(
-                                    "Дата создания: ${snapshot.data?.elementAt(i).date}",
-                                    style: const TextStyle(fontSize: 18)),
-                                SizedBox(
-                                  height: 35,
-                                  child: ElevatedButton(
-                                    onPressed: () {
-                                      final String? uid =
-                                          snapshot.data?.elementAt(i).uid;
-                                      Navigator.push(
-                                          context,
-                                          MaterialPageRoute(
-                                              builder: (context) =>
-                                                  EditPage(uid: uid)));
-                                    },
-                                    child: const Text(
-                                      'Изменить',
-                                      style: TextStyle(fontSize: 18),
-                                    ),
-                                  ),
+                                Image.network(
+                                  snapshot.data!.elementAt(i).uri,
+                                  errorBuilder: (context, error, stackTrace) {
+                                    return Text(error.toString());
+                                  },
                                 ),
+                                Text(
+                                    "Название: ${snapshot.data?.elementAt(i).name}",
+                                    style: const TextStyle(fontSize: 18)),
+                                Text(
+                                    "Размер: ${snapshot.data?.elementAt(i).size}",
+                                    style: const TextStyle(fontSize: 18)),
+                                Text(
+                                    "Ссылка: ${snapshot.data?.elementAt(i).uri}",
+                                    style: const TextStyle(fontSize: 18)),
                                 SizedBox(
                                   height: 35,
                                   child: ElevatedButton(
                                     onPressed: () {
-                                      context.read<DataCubit>().Delete(
-                                          snapshot.data?.elementAt(i).uid);
+                                      context.read<DataCubit>().delete(
+                                          snapshot.data?.elementAt(i).uid,
+                                          snapshot.data?.elementAt(i).uri);
                                     },
                                     child: const Text(
                                       'Удалить',
@@ -115,5 +111,44 @@ class _MainDataPage extends State<MainDataPage> {
         ),
       ],
     ))));
+  }
+
+  final _chars =
+      'AaBbCcDdEeFfGgHhIiJjKkLlMmNnOoPpQqRrSsTtUuVvWwXxYyZz1234567890';
+  Random _rnd = Random();
+  String getRandomString(int length) => String.fromCharCodes(Iterable.generate(
+      length, (_) => _chars.codeUnitAt(_rnd.nextInt(_chars.length))));
+  Future insertImage() async {
+    // final result = await ImagePicker.platform.pickFiles(
+    //   type: FileType.image,
+    //   dialogTitle: 'Выбор файла',
+    //   allowMultiple: false,
+    // );
+    final XFile? result =
+        await ImagePicker().pickImage(source: ImageSource.gallery);
+    if (result != null) {
+      final size = await result.length();
+
+      final file = await result.readAsBytes();
+
+      final name = getRandomString(5);
+      try {
+        // UploadTask task =
+        //     FirebaseStorage.instance.ref().child(result.name).putFile(file);
+        FirebaseStorage firebaseStorage = FirebaseStorage.instance;
+        Reference ref = firebaseStorage.ref().child(name);
+        UploadTask task = ref.putData(file);
+        await task;
+        task.then((data) async {
+          var url = await data.ref.getDownloadURL();
+          Record bulka = Record(
+              userid: FirebaseAuth.instance.currentUser!.uid,
+              name: result.name,
+              uri: url,
+              size: size);
+          FirebaseFirestore.instance.collection("images").add(bulka.toJson());
+        });
+      } catch (e) {}
+    } else {}
   }
 }

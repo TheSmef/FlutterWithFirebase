@@ -7,13 +7,15 @@ part of 'record.dart';
 // **************************************************************************
 
 _$_Record _$$_RecordFromJson(Map<String, dynamic> json) => _$_Record(
-      uid: json['uid'] as String,
-      content: json['content'] as String,
-      date: json['date'] as String,
+      userid: json['userid'] as String,
+      name: json['name'] as String,
+      uri: json['uri'] as String,
+      size: json['size'] as int,
     );
 
 Map<String, dynamic> _$$_RecordToJson(_$_Record instance) => <String, dynamic>{
-      'uid': instance.uid,
-      'content': instance.content,
-      'date': instance.date,
+      'userid': instance.userid,
+      'name': instance.name,
+      'uri': instance.uri,
+      'size': instance.size,
     };
